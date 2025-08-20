@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.8.xsd">
+
+    <!-- Подключение SQL-миграции -->
+    <include file="db/changelog/001_create_enums.sql"/>
+    <include file="db/changelog/002_create_tables.sql"/>
+    <include file="db/changelog/003_add_foreign_keys.sql"/>
+    <include file="db/changelog/004_drop-user_vk_id-column.sql"/>
+    <include file="db/changelog/005_add-user- label.sql"/>
+</databaseChangeLog>

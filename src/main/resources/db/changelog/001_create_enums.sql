@@ -1,0 +1,30 @@
+--liquibase formatted sql
+-- changeset enum:001
+
+CREATE TYPE roles AS ENUM ('CURATOR', 'ADMIN');
+
+CREATE TYPE labels AS ENUM (
+    'INDUSTRIAL',
+    'SOCIAL',
+    'VETERANS_SVO',
+    'YOUTH',
+    'POTENTIAL',
+    'CREATIVE'
+);
+
+CREATE TYPE status AS ENUM ('ACTIVE', 'DISABLED');
+
+CREATE TYPE categories AS ENUM (
+    'INDIVIDUAL_ENTREPRENEUR',
+    'SELF_EMPLOYED',
+    'INDIVIDUAl',
+    'ORGANIZATION',
+    'INDIVIDUAl_SELF_EMPLOYED',
+    'INDIVIDUAl_INDIVIDUAL_ENTREPRENEUR'
+);
+
+CREATE TYPE event_status AS ENUM ('CREATED', 'SENT', 'ACCEPTED', 'REJECTED', 'SKIPPED', 'SENT_ERROR');
+
+CREATE TYPE reaction AS ENUM ('YES', 'NO');
+
+CREATE TYPE feedback_status AS ENUM ('CREATED', 'IGNORED', 'COMPLETED');

@@ -1,0 +1,79 @@
+package org.example.pat.controller;
+
+import jakarta.validation.constraints.Email;
+import org.example.pat.dto.ApiResult;
+import org.example.pat.dto.auth.AuthRequest;
+import org.example.pat.dto.auth.AuthResponse;
+import org.example.pat.dto.curator.CreateCuratorInput;
+import org.example.pat.dto.curator.CuratorResponse;
+import org.example.pat.dto.curator.UpdateCuratorInput;
+import org.example.pat.entity.Curator;
+import org.example.pat.security.CurrentUserId;
+import org.example.pat.security.JwtTokenProvider;
+import org.example.pat.service.CuratorService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController()
+@RequestMapping("/admin")
+@PreAuthorize("hasRole('ADMIN')")
+public class AdminController {
+    private final CuratorService curatorService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public AdminController(CuratorService curatorService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
+        this.curatorService = curatorService;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    @PostMapping("/create-curator")
+    public ApiResult<CuratorResponse> createCurator(@RequestBody CreateCuratorInput input) {
+        return new ApiResult.Success<>(curatorService.createCurator(input));
+    }
+
+    @PreAuthorize("permitAll()")
+    @PostMapping("/login")
+    public ApiResult<AuthResponse> login(@RequestBody AuthRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.email(), request.password())
+        );
+        String token = jwtTokenProvider.generateToken(authentication);
+        return new ApiResult.Success<>(new AuthResponse(token));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'CURATOR')")
+    @GetMapping("/get-curator")
+    public ApiResult<CuratorResponse> getCurator(@CurrentUserId Long id) {
+        Curator curator = curatorService.getCurator(id);
+        return new ApiResult.Success<>(CuratorResponse.fromEntity(curator));
+    }
+
+    @PatchMapping("/update-curator/{id}")
+    public ApiResult<Curator> patchUpdate(@PathVariable Long id, @RequestBody UpdateCuratorInput input) {
+        return new ApiResult.Success<>(curatorService.updateCurator(id, input));
+    }
+
+    @PatchMapping("/delete-curator/{id}")
+    public ApiResult<Curator> softDeleteCurator(@PathVariable Long id) {
+        return new ApiResult.Success<>(curatorService.softDeleteCurator(id));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'CURATOR')")
+    @GetMapping("/get-curators")
+    public ApiResult<List<Curator>> getCurators() {
+        return new ApiResult.Success<>(curatorService.getAllCurator());
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'CURATOR')")
+    @GetMapping("/curator-by-email")
+    public ApiResult<CuratorResponse> getCuratorByEmail(@RequestParam @Email String email) {
+        return new ApiResult.Success<>(CuratorResponse.fromEntity(curatorService.getCuratorByEmail(email)));
+    }
+}
