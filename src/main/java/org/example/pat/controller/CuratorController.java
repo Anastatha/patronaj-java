@@ -1,7 +1,9 @@
 package org.example.pat.controller;
 
+import io.micrometer.common.lang.Nullable;
 import org.example.pat.dto.ApiResult;
 import org.example.pat.dto.user.CreateUserInput;
+import org.example.pat.dto.user.OkvedRequest;
 import org.example.pat.dto.user.UpdateUserInput;
 import org.example.pat.dto.user.UserResponse;
 import org.example.pat.entity.User;
@@ -22,7 +24,6 @@ public class CuratorController {
         this.userService = userService;
     }
 
-    // Создать пользователя
     @PreAuthorize("permitAll()")
     @PostMapping("/create-user/{curatorId}")
     public ApiResult<UserResponse> createUser(
@@ -31,7 +32,6 @@ public class CuratorController {
         return new ApiResult.Success<>(userService.createUser(curatorId, input));
     }
 
-    // Получить пользователя по id
     @PreAuthorize("permitAll()")
     @GetMapping("/get-user/{id}")
     public ApiResult<UserResponse> getUser(@PathVariable Long id) {
@@ -39,7 +39,6 @@ public class CuratorController {
         return new ApiResult.Success<>(UserResponse.fromEntity(user));
     }
 
-    // Получить всех пользователей
     @PreAuthorize("permitAll()")
     @GetMapping("/get-users")
     public ApiResult<List<UserResponse>> getAllUsers() {
@@ -50,8 +49,6 @@ public class CuratorController {
         return new ApiResult.Success<>(users);
     }
 
-    // Мягкое удаление пользователя
-//    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("permitAll()")
     @DeleteMapping("/delete-user/{id}")
     public ApiResult<UserResponse> softDelete(@PathVariable Long id) {
@@ -59,7 +56,6 @@ public class CuratorController {
         return new ApiResult.Success<>(UserResponse.fromEntity(user));
     }
 
-    // Пользователи по id куратора
     @PreAuthorize("permitAll()")
     @GetMapping("/get-users/{curatorId}")
     public ApiResult<List<UserResponse>> getUsersByCurator(@PathVariable Long curatorId) {
@@ -70,38 +66,34 @@ public class CuratorController {
         return new ApiResult.Success<>(users);
     }
 
-//    public static class LabelsRequest {
-//        private List<Label> labels;
-//
-//        public List<Label> getLabels() { return labels; }
-//        public void setLabels(List<Label> labels) { this.labels = labels; }
-//    }
-    // Поиск пользователей по labels
-//    @PreAuthorize("permitAll()")
-//    @PostMapping("/get-users-by-labels")
-//    public ApiResult<List<UserResponse>> getUsersByLabel(@RequestBody LabelsRequest request) {
-//        System.out.println(request.getLabels());
-//        List<UserResponse> users = userService.getUsersByLabel(request.getLabels())
-//                .stream()
-//                .map(UserResponse::fromEntity)
-//                .toList();
-//        return new ApiResult.Success<>(users);
-//    }
+    public static class LabelsRequest {
+        private List<Label> labels;
 
-    // Поиск пользователей по ОКВЭД
+        public List<Label> getLabels() { return labels; }
+        public void setLabels(List<Label> labels) { this.labels = labels; }
+    }
+
     @PreAuthorize("permitAll()")
-    @PostMapping("/get-users-by-okved")
-    public ApiResult<List<UserResponse>> getUsersByOkved(@RequestBody String okved) {
-        System.out.println(okved);
-        List<UserResponse> users = userService.getUsersByOkved(okved)
+    @PostMapping("/get-users-by-labels")
+    public ApiResult<List<UserResponse>> getUsersByLabel(@RequestBody LabelsRequest request) {
+        System.out.println(request.getLabels());
+        List<UserResponse> users = userService.getUsersByLabel(request.getLabels())
                 .stream()
                 .map(UserResponse::fromEntity)
                 .toList();
         return new ApiResult.Success<>(users);
     }
 
+    @PreAuthorize("permitAll()")
+    @PostMapping("/get-users-by-okved")
+    public ApiResult<List<UserResponse>> getUsersByOkved(@RequestBody OkvedRequest request) {
+        List<UserResponse> users = userService.getUsersByOkved(request.okved())
+                .stream()
+                .map(UserResponse::fromEntity)
+                .toList();
+        return new ApiResult.Success<>(users);
+    }
 
-    // Поиск пользователей по ОКВЭД или labels
     @PreAuthorize("permitAll()")
     @PostMapping("/get-users/by-labels-or-okved")
     public ApiResult<List<UserResponse>> getUsersByLabelOrOkved(
@@ -115,8 +107,7 @@ public class CuratorController {
         return new ApiResult.Success<>(users);
     }
 
-    // Обновить пользователя
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("permitAll()")
     @PutMapping("/update-user/{id}")
     public ApiResult<UserResponse> updateUser(
             @PathVariable Long id,
@@ -126,12 +117,11 @@ public class CuratorController {
         return new ApiResult.Success<>(UserResponse.fromEntity(updated));
     }
 
-    // Поиск пользователей по дате обновления
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("permitAll()")
     @GetMapping("/get-users-between")
     public ApiResult<List<UserResponse>> getUsersBetween(
-            @RequestParam String from,
-            @RequestParam String to
+            @RequestParam @Nullable String from,
+            @RequestParam @Nullable String to
     ) {
         List<UserResponse> users = userService.getUsersBetween(from, to)
                 .stream()

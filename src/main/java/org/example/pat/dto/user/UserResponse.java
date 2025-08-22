@@ -1,5 +1,6 @@
 package org.example.pat.dto.user;
 
+import org.example.pat.dto.curator.CuratorResponse;
 import org.example.pat.entity.User;
 import org.example.pat.entity.consts.Categorie;
 import org.example.pat.entity.consts.Label;
@@ -21,7 +22,8 @@ public record UserResponse(
         Categorie category,
         Long curatorId,
         List<Label> label,
-        String okved
+        String okved,
+        CuratorResponse curator
 ) {
     public static UserResponse fromEntity(User user) {
         return new UserResponse(
@@ -38,7 +40,18 @@ public record UserResponse(
                 user.getCategory(),
                 user.getCuratorId(),
                 user.getLabel(),
-                user.getOkved()
+                user.getOkved(),
+                user.getCurator() != null
+                        ? new CuratorResponse(
+                        user.getCurator().getId(),
+                        user.getCurator().getName(),
+                        user.getCurator().getSurname(),
+                        user.getCurator().getEmail(),
+                        user.getCurator().getPhone(),
+                        user.getCurator().getPatronymic(),
+                        user.getCurator().getRole()
+                )
+                        : null
         );
     }
 }

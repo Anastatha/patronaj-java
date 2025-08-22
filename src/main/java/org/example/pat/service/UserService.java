@@ -1,5 +1,6 @@
 package org.example.pat.service;
 
+import io.micrometer.common.lang.Nullable;
 import org.example.pat.dto.user.CreateUserInput;
 import org.example.pat.dto.user.UpdateUserInput;
 import org.example.pat.dto.user.UserResponse;
@@ -72,6 +73,7 @@ public class UserService {
         try {
             return userRepository.getUser(id);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new NotFoundException("Пользователь с id = " + id + " не найден");
         }
     }
@@ -100,13 +102,13 @@ public class UserService {
         }
     }
 
-//    public List<User> getUsersByLabel(List<Label> labels) {
-//        try {
-//            return userRepository.getUsersByLabel(labels);
-//        } catch (Exception e) {
-//            throw new RuntimeException("Ошибка при поиске пользователей по labels: " + e.getMessage(), e);
-//        }
-//    }
+    public List<User> getUsersByLabel(List<Label> labels) {
+        try {
+            return userRepository.getUsersByLabel(labels);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при поиске пользователей по labels: " + e.getMessage(), e);
+        }
+    }
 
     public List<User> getUsersByOkved(String okved) {
         try {
@@ -133,9 +135,9 @@ public class UserService {
         }
     }
 
-    public List<User> getUsersBetween(String from, String to) {
+    public List<User> getUsersBetween(@Nullable String from, @Nullable String to) {
         try {
-            return userRepository.getdUsersBetween(from, to);
+            return userRepository.getUsersBetween(from, to);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при поиске пользователей по дате обновления: " + e.getMessage(), e);
         }

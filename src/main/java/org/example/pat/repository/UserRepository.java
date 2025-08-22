@@ -8,11 +8,10 @@ import org.example.pat.mapper.UserResultSetMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -62,34 +61,34 @@ public class UserRepository {
 
     public User softDelete(Long id) {
         String sql = """
-            UPDATE public."user"
-            SET deleted_at = ?
-            WHERE id = ?
-            RETURNING id,
-                      user_telegram_id,
-                      name,
-                      surname,
-                      patronymic,
-                      email,
-                      organization_name,
-                      inn,
-                      phone,
-                      code,
-                      status,
-                      category,
-                      curator_id      AS user_curator_id,
-                      label,
-                      okved,
-                      deleted_at
-            """;
+                UPDATE public.user u 
+                SET deleted_at = ?
+                WHERE id = ?
+                RETURNING 
+                        u.id,
+                        u.user_telegram_id,
+                        u.name,
+                        u.surname,
+                        u.patronymic,
+                        u.email,
+                        u.organization_name,
+                        u.inn,
+                        u.phone,
+                        u.code,
+                        u.status,
+                        u.category,
+                        u.curator_id,
+                        u.label,
+                        u.okved,
+                        u.deleted_at
+                """;
 
         return jdbcClient.sql(sql)
-                .param(LocalDateTime.now()) // deleted_at
-                .param(id)                 // id
+                .param(LocalDateTime.now())
+                .param(id)
                 .query(userMapper)
                 .single();
     }
-
 
     public List<User> getUsers() {
         String sql = """
@@ -106,16 +105,18 @@ public class UserRepository {
                     u.code,
                     u.status,
                     u.category,
-                    u.curator_id      AS user_curator_id,
+                    u.curator_id, 
                     u.label,
                     u.okved,
                     u.deleted_at,
-                    c.id              AS curator_id,
+                    c.id              AS curator_entity_id,
                     c.name            AS curator_name,
                     c.surname         AS curator_surname,
-                    c.email           AS curator_email,
-                    c.phone           AS curator_phone
-                FROM public."user" u
+                    c.patronymic  AS curator_patronymic,
+                    c.email    AS curator_email,
+                    c.phone    AS curator_phone,
+                    c.role AS curator_role
+                FROM public.user u
                 LEFT JOIN public.curator c ON u.curator_id = c.id
                 WHERE u.deleted_at IS NULL;
                 """;
@@ -126,7 +127,7 @@ public class UserRepository {
 
     public User getUser(Long id) {
         String sql = """
-                SELECT\s
+                SELECT
                     u.id,
                     u.user_telegram_id,
                     u.name,
@@ -139,15 +140,17 @@ public class UserRepository {
                     u.code,
                     u.status,
                     u.category,
-                    u.curator_id AS user_curator_id,
+                    u.curator_id,
                     u.label,
                     u.okved,
                     u.deleted_at,
-                    c.id       AS curator_id,
+                    c.id       AS curator_entity_id,
                     c.name     AS curator_name,
                     c.surname  AS curator_surname,
+                    c.patronymic  AS curator_patronymic,
                     c.email    AS curator_email,
-                    c.phone    AS curator_phone
+                    c.phone    AS curator_phone,
+                    c.role AS curator_role
                 FROM public.user u
                 LEFT JOIN public.curator c ON u.curator_id = c.id
                 WHERE u.deleted_at IS NULL
@@ -161,27 +164,30 @@ public class UserRepository {
 
     public List<User> getUsersByCuratorId(Long id) {
         String sql = """
-                  SELECT u.id,
-                      u.user_telegram_id,
-                      u.name,
-                      u.surname,
-                      u.patronymic,
-                      u.email,
-                      u.organization_name,
-                      u.inn,
-                      u.phone,
-                      u.code,
-                      u.status,
-                      u.category,
-                      u.curator_id AS user_curator_id,
-                      u.label,
-                      u.okved,
-                      u.deleted_at,
-                      c.id       AS curator_id,
-                      c.name     AS curator_name,
-                      c.surname  AS curator_surname,
-                      c.email    AS curator_email,
-                      c.phone    AS curator_phone
+                  SELECT 
+                      u.id,
+                    u.user_telegram_id,
+                    u.name,
+                    u.surname,
+                    u.patronymic,
+                    u.email,
+                    u.organization_name,
+                    u.inn,
+                    u.phone,
+                    u.code,
+                    u.status,
+                    u.category,
+                    u.curator_id,
+                    u.label,
+                    u.okved,
+                    u.deleted_at,
+                      c.id       AS curator_entity_id,
+                    c.name     AS curator_name,
+                    c.surname  AS curator_surname,
+                    c.patronymic  AS curator_patronymic,
+                    c.email    AS curator_email,
+                    c.phone    AS curator_phone,
+                    c.role AS curator_role
                       FROM public.user u
                     LEFT JOIN public.curator c ON u.curator_id = c.id
                       WHERE u.curator_id = ?;
@@ -192,78 +198,81 @@ public class UserRepository {
                 .list();
     }
 
-//    public List<User> getUsersByLabel(List<Label> labels) {
-//        if (labels == null || labels.isEmpty()) return Collections.emptyList();
-//
-//        String labelsCsv = labels.stream()
-//                .map(Enum::name)
-//                .collect(Collectors.joining(","));
-//
-//        String sql = """
-//        SELECT u.id,
-//               u.user_telegram_id,
-//               u.name,
-//               u.surname,
-//               u.patronymic,
-//               u.email,
-//               u.organization_name,
-//               u.inn,
-//               u.phone,
-//               u.code,
-//               u.status,
-//               u.category,
-//               u.curator_id AS user_curator_id,
-//               u.label,
-//               u.okved,
-//               u.deleted_at,
-//               c.id AS curator_id,
-//               c.name AS curator_name,
-//               c.surname AS curator_surname,
-//               c.email AS curator_email,
-//               c.phone AS curator_phone
-//        FROM public."user" u
-//        LEFT JOIN public.curator c ON u.curator_id = c.id
-//        WHERE u.label && string_to_array(:labels, ',')::labels[]
-//          AND u.user_telegram_id IS NOT NULL
-//          AND u.deleted_at IS NULL
-//    """;
-//
-//        return jdbcClient.sql(sql)
-//                .param("labels", labelsCsv)
-//                .query(userMapper)
-//                .list();
-//    }
+    //проверить
+    public List<User> getUsersByLabel(List<Label> labels) {
+        if (labels == null || labels.isEmpty()) return Collections.emptyList();
 
-    public List<User> getUsersByOkved(String okved) {
+        String labelsCsv = labels.stream()
+                .map(Enum::name)
+                .collect(Collectors.joining(","));
+
         String sql = """
-            SELECT u.id,
-                   u.user_telegram_id,
-                   u.name,
-                   u.surname,
-                   u.patronymic,
-                   u.email,
-                   u.organization_name,
-                   u.inn,
-                   u.phone,
-                   u.code,
-                   u.status,
-                   u.category,
-                   u.curator_id AS user_curator_id,
-                   u.label,
-                   u.okved,
-                   u.deleted_at
-            FROM public.user u
-            WHERE u.okved = ?
-              AND u.user_telegram_id IS NOT NULL
-              AND u.deleted_at IS NULL
-            """;
+        SELECT u.id,
+               u.user_telegram_id,
+               u.name,
+               u.surname,
+               u.patronymic,
+               u.email,
+               u.organization_name,
+               u.inn,
+               u.phone,
+               u.code,
+               u.status,
+               u.category,
+               u.curator_id AS user_curator_id,
+               u.label,
+               u.okved,
+               u.deleted_at,
+               c.id AS curator_id,
+               c.name AS curator_name,
+               c.surname AS curator_surname,
+               c.email AS curator_email,
+               c.phone AS curator_phone
+        FROM public."user" u
+        LEFT JOIN public.curator c ON u.curator_id = c.id
+        WHERE u.label && string_to_array(:labels, ',')::labels[]
+          AND u.user_telegram_id IS NOT NULL
+          AND u.deleted_at IS NULL
+    """;
 
         return jdbcClient.sql(sql)
-                .param(okved)
+                .param("labels", labelsCsv)
                 .query(userMapper)
                 .list();
     }
 
+    public List<User> getUsersByOkved(String okved) {
+        String sql = """
+                SELECT 
+                     u.id,
+                        u.user_telegram_id,
+                        u.name,
+                        u.surname,
+                        u.patronymic,
+                        u.email,
+                        u.organization_name,
+                        u.inn,
+                        u.phone,
+                        u.code,
+                        u.status,
+                        u.category,
+                        u.curator_id,
+                        u.label,
+                        u.okved,
+                        u.deleted_at
+                FROM public.user u
+                WHERE u.okved LIKE ?
+                 AND u.user_telegram_id IS NOT NULL
+                 AND u.deleted_at IS NULL
+                """;
+
+        return jdbcClient.sql(sql)
+                .param(okved + "%")
+                .query(userMapper)
+                .list();
+    }
+
+    //проверить
     public List<User> getUsersLabelOrOkved(List<String> okved, List<Label> labels) {
         String sql = """
                 SELECT 
@@ -313,7 +322,7 @@ public class UserRepository {
     }
 
     public User update(Long id, UpdateUserInput input) {
-        StringBuilder sql = new StringBuilder("UPDATE user SET ");
+        StringBuilder sql = new StringBuilder("UPDATE public.\"user\" SET ");
         Map<String, Object> params = new HashMap<>();
         params.put("id", id);
 
@@ -353,10 +362,6 @@ public class UserRepository {
             sql.append("status = CAST(:status AS status), ");
             params.put("status", input.status().name());
         }
-        if (input.deletedAt() != null) {
-            sql.append("deleted_at = :deletedAt, ");
-            params.put("deletedAt", input.deletedAt());
-        }
         if (input.category() != null) {
             sql.append("category = CAST(:category AS categories), ");
             params.put("category", input.category().name());
@@ -365,9 +370,8 @@ public class UserRepository {
             sql.append("curator_id = :curatorId, ");
             params.put("curatorId", input.curatorId());
         }
-        if (input.label() != null) {
-            sql.append("label = :label, ");
-            // Преобразуем List<Label> в массив для PostgreSQL
+        if (input.label() != null && !input.label().isEmpty()) {
+            sql.append("label = array_cat(label, CAST(:label AS labels[])), ");
             String[] labelArray = input.label().stream()
                     .map(Enum::name)
                     .toArray(String[]::new);
@@ -377,15 +381,15 @@ public class UserRepository {
             sql.append("okved = :okved, ");
             params.put("okved", input.okved());
         }
-
-        sql.append("updated_at = :updatedAt, ");
-        params.put("updatedAt", LocalDateTime.now());
-
-        if (sql.toString().endsWith(", ")) {
-            sql.delete(sql.length() - 2, sql.length());
+        if (input.deletedAt() != null) {
+            sql.append("deleted_at = :deletedAt, ");
+            params.put("deletedAt", input.deletedAt());
         }
 
-        sql.append(" WHERE id = :id RETURNING *");
+        sql.append("updated_at = :updatedAt ");
+        params.put("updatedAt", LocalDateTime.now());
+
+        sql.append("WHERE id = :id RETURNING *");
 
         return jdbcClient.sql(sql.toString())
                 .params(params)
@@ -393,10 +397,10 @@ public class UserRepository {
                 .single();
     }
 
-    public List<User> getdUsersBetween(@Nullable String from, @Nullable String to) {
+    public List<User> getUsersBetween(@Nullable String from, @Nullable String to) {
         StringBuilder sql = new StringBuilder("""
-                SELECT 
-                    u.id,
+            SELECT 
+                 u.id,
                     u.user_telegram_id,
                     u.name,
                     u.surname,
@@ -408,41 +412,31 @@ public class UserRepository {
                     u.code,
                     u.status,
                     u.category,
-                    u.curator_id AS user_curator_id,
+                    u.curator_id,
                     u.label,
                     u.okved,
-                    u.deleted_at,
-                    u.updated_at,
-                    c.id AS curator_id,
-                    c.name AS curator_name,
-                    c.surname AS curator_surname,
-                    c.email AS curator_email,
-                    c.phone AS curator_phone
-                FROM public.user u
-                LEFT JOIN public.user c ON u.curator_id = c.id
-                WHERE u.deleted_at IS NULL
-                """);
+                    u.deleted_at
+            FROM public.user u
+            WHERE u.deleted_at IS NULL
+            """);
 
-        Map<String, Object> params = new HashMap<>();
+        List<Object> params = new ArrayList<>();
 
         if (from != null && !from.isBlank()) {
-            sql.append(" AND u.updated_at >= :from");
-            params.put("from", LocalDateTime.parse(from));
+            LocalDateTime fromDateTime = LocalDate.parse(from).atStartOfDay();
+            sql.append(" AND u.updated_at >= ?");
+            params.add(fromDateTime);
         }
 
         if (to != null && !to.isBlank()) {
-            sql.append(" AND u.updated_at <= :to");
-            // Устанавливаем время на конец дня (23:59:59.999)
-            LocalDateTime endOfDay = LocalDateTime.parse(to)
-                    .toLocalDate()
-                    .atTime(23, 59, 59, 999000000);
-            params.put("to", endOfDay);
+            LocalDateTime toDateTime = LocalDate.parse(to).atTime(23, 59, 59, 999_000_000);
+            sql.append(" AND u.updated_at <= ?");
+            params.add(toDateTime);
         }
 
         JdbcClient.StatementSpec statement = jdbcClient.sql(sql.toString());
-
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            statement = statement.param(entry.getKey(), entry.getValue());
+        for (Object param : params) {
+            statement = statement.param(param);
         }
 
         return statement.query(userMapper).list();
