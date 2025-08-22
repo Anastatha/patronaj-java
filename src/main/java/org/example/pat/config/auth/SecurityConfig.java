@@ -42,7 +42,7 @@ public class SecurityConfig {
                 )//Говорим Spring'у: не храни сессии (поскольку у нас Stateless-приложение). Вся информация о пользователе содержится в токене.
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/login").permitAll()//разрешено всем
-                        .requestMatchers("/curator/**").permitAll()
+
                         // Эндпоинты только для ADMIN
                         .requestMatchers(
                                 "/admin/create-curator",

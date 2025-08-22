@@ -7,7 +7,6 @@ import org.example.pat.dto.auth.AuthResponse;
 import org.example.pat.dto.curator.CreateCuratorInput;
 import org.example.pat.dto.curator.CuratorResponse;
 import org.example.pat.dto.curator.UpdateCuratorInput;
-import org.example.pat.dto.user.UserResponse;
 import org.example.pat.entity.Curator;
 import org.example.pat.security.CurrentUserId;
 import org.example.pat.security.JwtTokenProvider;
