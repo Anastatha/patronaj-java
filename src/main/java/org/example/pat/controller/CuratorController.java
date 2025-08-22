@@ -51,8 +51,9 @@ public class CuratorController {
     }
 
     // Мягкое удаление пользователя
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("'/delete-user/{id}")
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("permitAll()")
+    @DeleteMapping("/delete-user/{id}")
     public ApiResult<UserResponse> softDelete(@PathVariable Long id) {
         User user = userService.softDeleteUser(id);
         return new ApiResult.Success<>(UserResponse.fromEntity(user));

@@ -62,17 +62,34 @@ public class UserRepository {
 
     public User softDelete(Long id) {
         String sql = """
-                UPDATE user
-                SET deleted_at = :deleted_at
-                WHERE id = :id
-                RETURNING *;
-                """;
+            UPDATE public."user"
+            SET deleted_at = ?
+            WHERE id = ?
+            RETURNING id,
+                      user_telegram_id,
+                      name,
+                      surname,
+                      patronymic,
+                      email,
+                      organization_name,
+                      inn,
+                      phone,
+                      code,
+                      status,
+                      category,
+                      curator_id      AS user_curator_id,
+                      label,
+                      okved,
+                      deleted_at
+            """;
+
         return jdbcClient.sql(sql)
-                .param("id", id)
-                .param("deleted_at", LocalDateTime.now())
+                .param(LocalDateTime.now()) // deleted_at
+                .param(id)                 // id
                 .query(userMapper)
                 .single();
     }
+
 
     public List<User> getUsers() {
         String sql = """
