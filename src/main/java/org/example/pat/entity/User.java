@@ -27,22 +27,18 @@ public class User {
     private Long curatorId;
     private List<Label> label;
     private String okved;
+    private Curator curator;
 
     public User() {
     }
 
-//    public User(CreateUserInput request) {
-//        this.name = request.getName();
-//        this.surname = request.getSurname();
-//        this.patronymic = request.getPatronymic();
-//        this.organizationName = request.getOrganizationName();
-//        this.inn = request.getInn();
-//        this.email = request.getEmail();
-//        this.phone = request.getPhone();
-//        this.category = request.getCategory();
-//        this.curatorId = request.getCuratorId();
-//        this.label = request.getLabel();
-//    }
+    public void setCurator(Curator curator) {
+        this.curator = curator;
+    }
+
+    public Curator getCurator() {
+        return curator;
+    }
 
     public User(CreateUserInput request) {
         this.name = request.getName(); // может быть null

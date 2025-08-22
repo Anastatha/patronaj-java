@@ -40,16 +40,16 @@ public class CuratorRepository {
 
     public Curator getCurator(Long id) {
         String sql = """
-        SELECT c.id, c.name, c.patronymic, c.phone, c.role, c.email,
-               c.password, c.surname, c.deleted_at
-        FROM public.curator c
-        LEFT JOIN public.user u ON c.id = u.curator_id
-        WHERE c.id = ?;
-        
-    """;
+                    SELECT c.id, c.name, c.patronymic, c.phone, c.role, c.email,
+                           c.password, c.surname, c.deleted_at
+                    FROM public.curator c
+                    LEFT JOIN public.user u ON c.id = u.curator_id
+                    WHERE c.id = ?;
+                
+                """;
 
         return jdbcClient.sql(sql)
-                .param( id)
+                .param(id)
                 .query(new CuratorResultSetMapper())
                 .single();
     }
@@ -78,7 +78,7 @@ public class CuratorRepository {
                 .single();
     }
 
-    public Curator softDelete(long id) {
+    public Curator softDelete(Long id) {
         String sql = """
                 UPDATE curator
                 SET deleted_at = :deleted_at
@@ -119,7 +119,6 @@ public class CuratorRepository {
             params.put("role", input.role().name());
         }
 
-        // Удаляем последнюю запятую
         sql.delete(sql.length() - 2, sql.length());
         sql.append(" WHERE id = :id RETURNING *");
 

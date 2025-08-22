@@ -7,6 +7,7 @@ import org.example.pat.dto.auth.AuthResponse;
 import org.example.pat.dto.curator.CreateCuratorInput;
 import org.example.pat.dto.curator.CuratorResponse;
 import org.example.pat.dto.curator.UpdateCuratorInput;
+import org.example.pat.dto.user.UserResponse;
 import org.example.pat.entity.Curator;
 import org.example.pat.security.CurrentUserId;
 import org.example.pat.security.JwtTokenProvider;
@@ -56,19 +57,23 @@ public class AdminController {
     }
 
     @PatchMapping("/update-curator/{id}")
-    public ApiResult<Curator> patchUpdate(@PathVariable Long id, @RequestBody UpdateCuratorInput input) {
-        return new ApiResult.Success<>(curatorService.updateCurator(id, input));
+    public ApiResult<CuratorResponse> patchUpdate(@PathVariable Long id, @RequestBody UpdateCuratorInput input) {
+        return new ApiResult.Success<>(CuratorResponse.fromEntity(curatorService.updateCurator(id, input)));
     }
 
     @PatchMapping("/delete-curator/{id}")
-    public ApiResult<Curator> softDeleteCurator(@PathVariable Long id) {
-        return new ApiResult.Success<>(curatorService.softDeleteCurator(id));
+    public ApiResult<CuratorResponse> softDeleteCurator(@PathVariable Long id) {
+        return new ApiResult.Success<>(CuratorResponse.fromEntity(curatorService.softDeleteCurator(id)));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'CURATOR')")
     @GetMapping("/get-curators")
-    public ApiResult<List<Curator>> getCurators() {
-        return new ApiResult.Success<>(curatorService.getAllCurator());
+    public ApiResult<List<CuratorResponse>> getCurators() {
+        List<CuratorResponse> curators = curatorService.getAllCurator()
+                .stream()
+                .map(CuratorResponse::fromEntity)
+                .toList();
+        return new ApiResult.Success<>(curators);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'CURATOR')")

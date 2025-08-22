@@ -1,15 +1,19 @@
 package org.example.pat.service;
 
 import org.example.pat.dto.user.CreateUserInput;
+import org.example.pat.dto.user.UpdateUserInput;
 import org.example.pat.dto.user.UserResponse;
 import org.example.pat.entity.Curator;
 import org.example.pat.entity.User;
+import org.example.pat.entity.consts.Label;
 import org.example.pat.exception.*;
 import org.example.pat.repository.CuratorRepository;
 import org.example.pat.repository.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -55,7 +59,7 @@ public class UserService {
 
             User createdUser = userRepository.create(user);
 
-            mailService.sendMail(user, curator);
+//            mailService.sendMail(user, curator);
 
             return UserResponse.fromEntity(createdUser);
 
@@ -64,4 +68,76 @@ public class UserService {
         }
     }
 
+    public User getUser(Long id) {
+        try {
+            return userRepository.getUser(id);
+        } catch (Exception e) {
+            throw new NotFoundException("Пользователь с id = " + id + " не найден");
+        }
+    }
+
+    public List<User> getAllUsers() {
+        try {
+            return userRepository.getUsers();
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при получении списка пользователей: " + e.getMessage(), e);
+        }
+    }
+
+    public User softDeleteUser(Long id) {
+        try {
+            return userRepository.softDelete(id);
+        } catch (Exception e) {
+            throw new NotFoundException("Не удалось удалить пользователя с id = " + id);
+        }
+    }
+
+    public List<User> getUsersByCuratorId(Long curatorId) {
+        try {
+            return userRepository.getUsersByCuratorId(curatorId);
+        } catch (Exception e) {
+            throw new NotFoundException("Пользователи куратора с id = " + curatorId + " не найдены");
+        }
+    }
+
+//    public List<User> getUsersByLabel(List<Label> labels) {
+//        try {
+//            return userRepository.getUsersByLabel(labels);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Ошибка при поиске пользователей по labels: " + e.getMessage(), e);
+//        }
+//    }
+
+    public List<User> getUsersByOkved(String okved) {
+        try {
+            return userRepository.getUsersByOkved(okved);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при поиске пользователей по ОКВЭД: " + e.getMessage(), e);
+        }
+    }
+
+    public List<User> getUsersByLabelOrOkved(List<String> okved, List<Label> labels) {
+        try {
+            return userRepository.getUsersLabelOrOkved(okved, labels);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при поиске пользователей по labels или ОКВЭД: " + e.getMessage(), e);
+        }
+    }
+
+    public User updateUser(Long id, UpdateUserInput input) {
+        getUser(id);
+        try {
+            return userRepository.update(id, input);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при обновлении пользователя: " + e.getMessage(), e);
+        }
+    }
+
+    public List<User> getUsersBetween(String from, String to) {
+        try {
+            return userRepository.getdUsersBetween(from, to);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при поиске пользователей по дате обновления: " + e.getMessage(), e);
+        }
+    }
 }
