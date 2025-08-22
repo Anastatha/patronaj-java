@@ -198,42 +198,34 @@ public class UserRepository {
                 .list();
     }
 
-    //проверить
     public List<User> getUsersByLabel(List<Label> labels) {
-        if (labels == null || labels.isEmpty()) return Collections.emptyList();
-
         String labelsCsv = labels.stream()
                 .map(Enum::name)
                 .collect(Collectors.joining(","));
 
         String sql = """
-        SELECT u.id,
-               u.user_telegram_id,
-               u.name,
-               u.surname,
-               u.patronymic,
-               u.email,
-               u.organization_name,
-               u.inn,
-               u.phone,
-               u.code,
-               u.status,
-               u.category,
-               u.curator_id AS user_curator_id,
-               u.label,
-               u.okved,
-               u.deleted_at,
-               c.id AS curator_id,
-               c.name AS curator_name,
-               c.surname AS curator_surname,
-               c.email AS curator_email,
-               c.phone AS curator_phone
-        FROM public."user" u
-        LEFT JOIN public.curator c ON u.curator_id = c.id
-        WHERE u.label && string_to_array(:labels, ',')::labels[]
-          AND u.user_telegram_id IS NOT NULL
-          AND u.deleted_at IS NULL
-    """;
+                    SELECT 
+                                  u.id,
+                                u.user_telegram_id,
+                                u.name,
+                                u.surname,
+                                u.patronymic,
+                                u.email,
+                                u.organization_name,
+                                u.inn,
+                                u.phone,
+                                u.code,
+                                u.status,
+                                u.category,
+                                u.curator_id,
+                                u.label,
+                                u.okved,
+                                u.deleted_at
+                    FROM public."user" u
+                    WHERE u.label && string_to_array(:labels, ',')::labels[]
+                      AND u.user_telegram_id IS NOT NULL
+                      AND u.deleted_at IS NULL
+                """;
 
         return jdbcClient.sql(sql)
                 .param("labels", labelsCsv)
@@ -272,31 +264,25 @@ public class UserRepository {
                 .list();
     }
 
-    //проверить
     public List<User> getUsersLabelOrOkved(List<String> okved, List<Label> labels) {
         String sql = """
                 SELECT 
-                    u.id,
-                    u.user_telegram_id,
-                    u.name,
-                    u.surname,
-                    u.patronymic,
-                    u.email,
-                    u.organization_name,
-                    u.inn,
-                    u.phone,
-                    u.code,
-                    u.status,
-                    u.category,
-                    u.curator_id AS user_curator_id,
-                    u.label,
-                    u.okved,
-                    u.deleted_at,
-                    c.id AS curator_id,
-                    c.name AS curator_name,
-                    c.surname AS curator_surname,
-                    c.email AS curator_email,
-                    c.phone AS curator_phone
+                        u.id,
+                        u.user_telegram_id,
+                        u.name,
+                        u.surname,
+                        u.patronymic,
+                        u.email,
+                        u.organization_name,
+                        u.inn,
+                        u.phone,
+                        u.code,
+                        u.status,
+                        u.category,
+                        u.curator_id,
+                        u.label,
+                        u.okved,
+                        u.deleted_at
                 FROM public.user u
                 WHERE (
                     (u.label && CAST(? AS labels[]) AND u.user_telegram_id IS NOT NULL)
@@ -306,12 +292,10 @@ public class UserRepository {
                 AND u.deleted_at IS NULL
                 """;
 
-        // Преобразуем labels в массив строк
         String[] labelNames = labels.stream()
                 .map(Enum::name)
                 .toArray(String[]::new);
 
-        // Преобразуем okvedList в массив строк
         String[] okvedArray = okved.toArray(new String[0]);
 
         return jdbcClient.sql(sql)

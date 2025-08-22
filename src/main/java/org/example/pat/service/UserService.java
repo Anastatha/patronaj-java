@@ -118,7 +118,7 @@ public class UserService {
         }
     }
 
-    public List<User> getUsersByLabelOrOkved(List<String> okved, List<Label> labels) {
+    public List<User> getUsersByLabelOrOkved(@Nullable List<String> okved, @Nullable List<Label> labels) {
         try {
             return userRepository.getUsersLabelOrOkved(okved, labels);
         } catch (Exception e) {

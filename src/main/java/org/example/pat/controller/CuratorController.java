@@ -2,10 +2,7 @@ package org.example.pat.controller;
 
 import io.micrometer.common.lang.Nullable;
 import org.example.pat.dto.ApiResult;
-import org.example.pat.dto.user.CreateUserInput;
-import org.example.pat.dto.user.OkvedRequest;
-import org.example.pat.dto.user.UpdateUserInput;
-import org.example.pat.dto.user.UserResponse;
+import org.example.pat.dto.user.*;
 import org.example.pat.entity.User;
 import org.example.pat.entity.consts.Label;
 import org.example.pat.service.UserService;
@@ -66,18 +63,10 @@ public class CuratorController {
         return new ApiResult.Success<>(users);
     }
 
-    public static class LabelsRequest {
-        private List<Label> labels;
-
-        public List<Label> getLabels() { return labels; }
-        public void setLabels(List<Label> labels) { this.labels = labels; }
-    }
-
     @PreAuthorize("permitAll()")
     @PostMapping("/get-users-by-labels")
-    public ApiResult<List<UserResponse>> getUsersByLabel(@RequestBody LabelsRequest request) {
-        System.out.println(request.getLabels());
-        List<UserResponse> users = userService.getUsersByLabel(request.getLabels())
+    public ApiResult<List<UserResponse>> getUsersByLabel(@RequestBody LabelsInput request) {
+        List<UserResponse> users = userService.getUsersByLabel(request.labels())
                 .stream()
                 .map(UserResponse::fromEntity)
                 .toList();
@@ -86,7 +75,7 @@ public class CuratorController {
 
     @PreAuthorize("permitAll()")
     @PostMapping("/get-users-by-okved")
-    public ApiResult<List<UserResponse>> getUsersByOkved(@RequestBody OkvedRequest request) {
+    public ApiResult<List<UserResponse>> getUsersByOkved(@RequestBody OkvedInput request) {
         List<UserResponse> users = userService.getUsersByOkved(request.okved())
                 .stream()
                 .map(UserResponse::fromEntity)
@@ -95,12 +84,11 @@ public class CuratorController {
     }
 
     @PreAuthorize("permitAll()")
-    @PostMapping("/get-users/by-labels-or-okved")
+    @PostMapping("/get-users-by-labels-or-okved")
     public ApiResult<List<UserResponse>> getUsersByLabelOrOkved(
-            @RequestParam(required = false) List<String> okved,
-            @RequestBody(required = false) List<Label> labels
+            @RequestBody LabelsOrOkvedsInput request
     ) {
-        List<UserResponse> users = userService.getUsersByLabelOrOkved(okved, labels)
+        List<UserResponse> users = userService.getUsersByLabelOrOkved(request.okved(), request.labels())
                 .stream()
                 .map(UserResponse::fromEntity)
                 .toList();
