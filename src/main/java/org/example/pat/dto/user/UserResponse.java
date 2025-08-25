@@ -1,5 +1,6 @@
 package org.example.pat.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.example.pat.dto.curator.CuratorResponse;
 import org.example.pat.entity.User;
 import org.example.pat.entity.consts.Categorie;

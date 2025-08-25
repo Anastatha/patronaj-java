@@ -41,17 +41,32 @@ public class CuratorRepository {
     public Curator getCurator(Long id) {
         String sql = """
                     SELECT c.id, c.name, c.patronymic, c.phone, c.role, c.email,
-                           c.password, c.surname, c.deleted_at
+                           c.password, c.surname, c.deleted_at,
+                           u.id AS user_entity_id, 
+                           u.email AS user_email, 
+                           u.name AS user_name, 
+                           u.patronymic AS user_patronymic, 
+                           u.surname AS user_surname,
+                           u.inn AS user_inn,
+                           u.okved AS user_okved,
+                           u.category AS user_category,
+                           u.status AS user_status,
+                           u.phone AS user_phone, 
+                           u.label AS user_label,
+                           u.user_telegram_id AS user_telegram_id,
+                           u.organization_name AS user_organization_name,
+                           u.deleted_at AS user_deleted_at,
+                           u.code AS user_code
                     FROM public.curator c
-                    LEFT JOIN public.user u ON c.id = u.curator_id
-                    WHERE c.id = ?;
-                
+                    LEFT JOIN public."user" u ON c.id = u.curator_id
+                    WHERE c.id = ?
                 """;
 
-        return jdbcClient.sql(sql)
+        List<Curator> result = jdbcClient.sql(sql)
                 .param(id)
                 .query(new CuratorResultSetMapper())
-                .single();
+                .list();
+        return result.isEmpty() ? null : result.get(0);
     }
 
     public List<Curator> getCurators() {

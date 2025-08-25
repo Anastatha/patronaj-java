@@ -14,8 +14,17 @@ public class Curator {
     private String phone;
     private LocalDateTime deletedAt;
     private Roles role;
+    private User user;
 
     public Curator() {
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Curator(Long id, String email, String password, String name, String patronymic, String surname, String phone, LocalDateTime deletedAt, Roles role) {

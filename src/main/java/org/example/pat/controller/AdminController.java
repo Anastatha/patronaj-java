@@ -6,6 +6,7 @@ import org.example.pat.dto.auth.AuthRequest;
 import org.example.pat.dto.auth.AuthResponse;
 import org.example.pat.dto.curator.CreateCuratorInput;
 import org.example.pat.dto.curator.CuratorResponse;
+import org.example.pat.dto.curator.CuratorWithUserResponse;
 import org.example.pat.dto.curator.UpdateCuratorInput;
 import org.example.pat.entity.Curator;
 import org.example.pat.security.CurrentUserId;
@@ -50,9 +51,9 @@ public class AdminController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'CURATOR')")
     @GetMapping("/get-curator")
-    public ApiResult<CuratorResponse> getCurator(@CurrentUserId Long id) {
+    public ApiResult<CuratorWithUserResponse> getCurator(@CurrentUserId Long id) {
         Curator curator = curatorService.getCurator(id);
-        return new ApiResult.Success<>(CuratorResponse.fromEntity(curator));
+        return new ApiResult.Success<>(CuratorWithUserResponse.fromEntity(curator));
     }
 
     @PatchMapping("/update-curator/{id}")
