@@ -1,4 +1,4 @@
-package org.example.pat.service;
+package org.example.pat.infrastructure;
 
 import org.example.pat.entity.Curator;
 import org.example.pat.entity.User;

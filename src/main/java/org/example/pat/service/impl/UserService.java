@@ -1,15 +1,18 @@
-package org.example.pat.service;
+package org.example.pat.service.impl;
 
 import io.micrometer.common.lang.Nullable;
 import org.example.pat.dto.user.CreateUserInput;
 import org.example.pat.dto.user.UpdateUserInput;
-import org.example.pat.dto.user.UserResponse;
 import org.example.pat.entity.Curator;
 import org.example.pat.entity.User;
 import org.example.pat.entity.consts.Label;
 import org.example.pat.exception.*;
+import org.example.pat.infrastructure.DadataService;
+import org.example.pat.infrastructure.MailService;
+import org.example.pat.infrastructure.RedisService;
 import org.example.pat.repository.CuratorRepository;
 import org.example.pat.repository.UserRepository;
+import org.example.pat.service.IUserService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class UserService {
+public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final CuratorRepository curatorRepository;
     private final DadataService dadataService;
@@ -37,7 +40,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse createUser(Long curatorId, CreateUserInput createUserInput) {
+    public User createUser(Long curatorId, CreateUserInput createUserInput) {
         try {
             Curator curator = curatorRepository.getCurator(curatorId);
 
@@ -62,7 +65,7 @@ public class UserService {
 
 //            mailService.sendMail(user, curator);
 
-            return UserResponse.fromEntity(createdUser);
+            return createdUser;
 
         } catch (DataIntegrityViolationException e) {
             throw new UserAlreadyExistsException();

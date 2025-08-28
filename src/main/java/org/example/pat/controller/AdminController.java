@@ -11,7 +11,7 @@ import org.example.pat.dto.curator.UpdateCuratorInput;
 import org.example.pat.entity.Curator;
 import org.example.pat.security.CurrentUserId;
 import org.example.pat.security.JwtTokenProvider;
-import org.example.pat.service.CuratorService;
+import org.example.pat.service.ICuratorService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,11 +24,11 @@ import java.util.List;
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
-    private final CuratorService curatorService;
+    private final ICuratorService curatorService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AdminController(CuratorService curatorService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
+    public AdminController(ICuratorService curatorService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.curatorService = curatorService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -36,7 +36,7 @@ public class AdminController {
 
     @PostMapping("/create-curator")
     public ApiResult<CuratorResponse> createCurator(@RequestBody CreateCuratorInput input) {
-        return new ApiResult.Success<>(curatorService.createCurator(input));
+        return new ApiResult.Success<>(CuratorResponse.fromEntity(curatorService.createCurator(input)));
     }
 
     @PreAuthorize("permitAll()")

@@ -1,4 +1,4 @@
-package org.example.pat.service;
+package org.example.pat.infrastructure;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;

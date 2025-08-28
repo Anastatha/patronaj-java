@@ -1,6 +1,5 @@
 package org.example.pat.dto.curator;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.example.pat.dto.user.UserResponse;
 import org.example.pat.entity.Curator;
 import org.example.pat.entity.consts.Roles;
@@ -17,7 +16,6 @@ public record CuratorWithUserResponse(
 ) {
     public static CuratorWithUserResponse fromEntity(Curator curator) {
         return new CuratorWithUserResponse(
-
                 curator.getId(),
                 curator.getEmail(),
                 curator.getName(),

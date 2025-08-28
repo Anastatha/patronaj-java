@@ -5,7 +5,7 @@ import org.example.pat.dto.ApiResult;
 import org.example.pat.dto.user.*;
 import org.example.pat.entity.User;
 import org.example.pat.security.CurrentUserId;
-import org.example.pat.service.UserService;
+import org.example.pat.service.IUserService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +15,9 @@ import java.util.List;
 @RequestMapping("/curator")
 @PreAuthorize("hasRole('CURATOR')")
 public class CuratorController {
-    private final UserService userService;
+    private final IUserService userService;
 
-    public CuratorController(UserService userService) {
+    public CuratorController(IUserService userService) {
         this.userService = userService;
     }
 
@@ -25,7 +25,7 @@ public class CuratorController {
     public ApiResult<UserResponse> createUser(
             @CurrentUserId Long curatorId,
             @RequestBody CreateUserInput input) {
-        return new ApiResult.Success<>(userService.createUser(curatorId, input));
+        return new ApiResult.Success<>(UserResponse.fromEntity(userService.createUser(curatorId, input)));
     }
 
     @GetMapping("/get-user/{id}")

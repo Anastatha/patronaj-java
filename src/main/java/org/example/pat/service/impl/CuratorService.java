@@ -1,18 +1,18 @@
-package org.example.pat.service;
+package org.example.pat.service.impl;
 
 import org.example.pat.dto.curator.CreateCuratorInput;
-import org.example.pat.dto.curator.CuratorResponse;
 import org.example.pat.dto.curator.UpdateCuratorInput;
 import org.example.pat.entity.Curator;
 import org.example.pat.exception.NotFoundException;
 import org.example.pat.repository.CuratorRepository;
+import org.example.pat.service.ICuratorService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class CuratorService {
+public class CuratorService implements ICuratorService {
     private final CuratorRepository curatorRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -21,7 +21,7 @@ public class CuratorService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public CuratorResponse createCurator(CreateCuratorInput input) {
+    public Curator createCurator(CreateCuratorInput input) {
         try {
             Curator curator = new Curator();
             curator.setPhone(input.phone());
@@ -32,8 +32,7 @@ public class CuratorService {
             curator.setEmail(input.email());
             curator.setRole(input.role());
 
-            Curator createCurator = curatorRepository.create(curator);
-            return CuratorResponse.fromEntity(createCurator);
+            return curatorRepository.create(curator);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при создании куратора: " + e.getMessage(), e);
         }
